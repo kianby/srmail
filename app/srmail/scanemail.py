@@ -33,9 +33,9 @@ class EmailScanner(Thread):
                     # logger.debug('check inbox: %d email(s)' % count)
                     for num in range(count):
                         msg_num = num + 1
-                        msg = mbox.fetch_simple_message(msg_num)
+                        msg = mbox.fetch_message_as_json(msg_num)
                         process(mbox, msg_num, msg)
-                        break
+                        #break
 
             except:
                 logger.exception("main loop exception")

@@ -40,16 +40,23 @@ class Mailbox(object):
         email_msg = email.message_from_bytes(data[0][1])
         return email_msg
 
-    def fetch_simple_message(self, num):
+    def fetch_message_as_json(self, num):
         simple_msg = {"Imap": num}
         msg = self.fetch_message(num)
+        print(msg.keys())
         for key in ('Date', 'From', 'To', 'Subject'):
             simple_msg[key] = msg[key]
+        parts = []
         for part in msg.walk():
-            content_type = part.get_content_type()
-            if content_type and content_type == 'text/plain':
-                body = part.get_payload(decode=True)
-                simple_msg['Body'] = body
+            part_item = {}
+            content = part.get_payload(decode=True)
+            if content is None:
+                self.logger.warn('ignore part ' + part.get_content_type())
+            else:
+                part_item['Content-Type'] = part.get_content_type()
+                part_item['Content'] = content
+                parts.append(part_item)
+        simple_msg['Parts'] = parts
         self.logger.debug(simple_msg)
         return simple_msg
 
