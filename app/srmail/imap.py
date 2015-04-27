@@ -41,11 +41,10 @@ class Mailbox(object):
         return email_msg
 
     def fetch_message_as_json(self, num):
-        simple_msg = {"Imap": num}
+        json_msg = {'Index': num}
         msg = self.fetch_message(num)
-        print(msg.keys())
         for key in ('Date', 'From', 'To', 'Subject'):
-            simple_msg[key] = msg[key]
+            json_msg[key] = msg[key]
         parts = []
         for part in msg.walk():
             part_item = {}
@@ -56,9 +55,9 @@ class Mailbox(object):
                 part_item['Content-Type'] = part.get_content_type()
                 part_item['Content'] = content
                 parts.append(part_item)
-        simple_msg['Parts'] = parts
-        self.logger.debug(simple_msg)
-        return simple_msg
+        json_msg['Parts'] = parts
+        self.logger.debug(json_msg)
+        return json_msg
 
     def delete_message(self, num):
         self.imap.select('Inbox')
