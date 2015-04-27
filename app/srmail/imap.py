@@ -4,7 +4,11 @@
 import imaplib
 import email
 import logging
+import base64
+import re
+import datetime
 
+filename_re = re.compile("filename=\"(.+)\"|filename=([^;\n\r\"\']+)", re.I|re.S)
 
 class Mailbox(object):
 
@@ -40,23 +44,61 @@ class Mailbox(object):
         email_msg = email.message_from_bytes(data[0][1])
         return email_msg
 
+    def _parse_date(self, v):
+        if v is None:
+            return datetime.datetime.now()
+
+        tt = email.utils.parsedate_tz(v)
+
+        if tt is None:
+            return datetime.datetime.now()
+
+        timestamp = email.utils.mktime_tz(tt)
+        date = datetime.datetime.fromtimestamp(timestamp)
+        return date
+
     def fetch_message_as_json(self, num):
-        json_msg = {'Index': num}
         msg = self.fetch_message(num)
-        for key in ('Date', 'From', 'To', 'Subject'):
-            json_msg[key] = msg[key]
+        json_msg = {}
+        json_msg['encoding'] = 'UTF-8'
+        json_msg['index'] = num
+        json_msg['datetime'] = self._parse_date(msg['Date']).strftime("%Y-%m-%d %H:%M:%S")
+        json_msg['from'] = msg['From']
+        json_msg['to'] = msg['To']
+        json_msg['subject'] = msg['Subject']
         parts = []
+        attachments = []
         for part in msg.walk():
-            part_item = {}
-            content = part.get_payload(decode=True)
-            if content is None:
-                self.logger.warn('ignore part ' + part.get_content_type())
+            if part.is_multipart():
+                continue
+
+            content_disposition = part.get("Content-Disposition", None)
+            if content_disposition:
+                # we have attachment
+                r = filename_re.findall(content_disposition)
+                if r:
+                    filename = sorted(r[0])[1]
+                else:
+                    filename = "undefined"
+                a = { "filename": filename, "content": base64.b64encode(part.get_payload(decode = True)).decode(), "content-type": part.get_content_type() }
+                attachments.append(a)
             else:
-                part_item['Content-Type'] = part.get_content_type()
-                part_item['Content'] = content
+                part_item = {}
+                content = part.get_payload(decode=True)
+                content_type = part.get_content_type()
+                try:
+                    charset = part.get_param('charset', None)
+                    if charset:
+                        content = content.decode(charset).encode('UTF-8').decode('UTF-8')
+                except:
+                    self.logger.exception()
+                part_item['content'] = content
+                part_item['content-type'] = content_type
                 parts.append(part_item)
-        json_msg['Parts'] = parts
-        self.logger.debug(json_msg)
+        if parts:
+            json_msg['parts'] = parts
+        if attachments: 
+                json_msg['attachments'] = attachments
         return json_msg
 
     def delete_message(self, num):
