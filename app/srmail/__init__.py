@@ -54,7 +54,6 @@ logger = logging.getLogger(__name__)
 configure_logging(logging.DEBUG)
 
 # configure flask
-
 config = load_config()
 config["global"]["cwd"] = os.getcwd()
 app.config["app"] = config
@@ -63,5 +62,9 @@ app.config["app"] = config
 scanemail.start(config)
 
 app.wsgi_app = ProxyFix(app.wsgi_app)
+
+# initialize API 
+from srmail import api
+api.init()
 
 logger.info("Start SRMAIL application")

@@ -1,6 +1,7 @@
 { 
     "global" : {
-        "lang": "en"
+        "lang": "en",
+        "polling": 120
     },
     "imap": {
         "host": "mail.gandi.net",

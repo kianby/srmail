@@ -30,19 +30,16 @@ class EmailScanner(Thread):
             try:
                 with imap.Mailbox(self.app_config) as mbox:
                     count = mbox.get_count()
-                    # logger.debug('check inbox: %d email(s)' % count)
+                    #logger.debug('check inbox: %d email(s)' % count)
                     for num in range(count):
-                        msg_num = num + 1
-                        msg = mbox.fetch_message_as_json(msg_num)
-                        process(mbox, msg_num, msg)
-                        #break
+                        msg = mbox.fetch_message_as_json(num + 1)
+                        #process(mbox, msg_num, msg)
 
             except:
                 logger.exception("main loop exception")
 
-            # check email every 30 seconds
-            # TODO make configurable
-            time.sleep(300)
+            # check email every <polling> seconds
+            time.sleep(self.app_config['global']['polling'])
 
         self.is_running = False
 
