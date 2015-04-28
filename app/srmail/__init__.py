@@ -6,7 +6,7 @@ import json
 import logging
 from flask import Flask
 from werkzeug.contrib.fixers import ProxyFix
-from srmail import scanemail
+from srmail import emailer
 
 app = Flask(__name__)
 
@@ -61,7 +61,7 @@ app.config["app"] = config
 # if we have to push incoming emails
 # then we start email inbox polling thread 
 if config['global']['post_urls']:
-    scanemail.start(config)
+    emailer.start(config)
 
 app.wsgi_app = ProxyFix(app.wsgi_app)
 

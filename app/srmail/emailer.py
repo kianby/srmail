@@ -1,21 +1,24 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import re
 import time
 from threading import Thread
 import logging
-import re
 import requests 
 import json
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from srmail import imap
 
 logger = logging.getLogger(__name__)
 
 
-class EmailScanner(Thread):
+class Emailer(Thread):
 
     def __init__(self, config):
-        super(EmailScanner, self).__init__()
+        super(Emailer, self).__init__()
         self.app_config = config
 
 
@@ -64,6 +67,29 @@ def process(mbox, msg, post_urls):
             logger.exception('cannot post to %s' % url)
 
 
+def mail(config, m):
+
+    from_email = config['login']
+    if 'from' in m:
+        from_email = m['from']
+
+    # Create the container (outer) email message.
+    msg = MIMEMultipart()
+    msg['Subject'] = m['subject']
+    msg['To'] = m['to']
+    msg['From'] = from_email
+    msg.preamble = m['subject']
+    part = MIMEText(m['content'], 'plain')
+    msg.attach(part)
+
+    s = smtplib.SMTP(config['host'], config['port'])
+    if config['starttls']:
+        s.starttls()
+    s.login(config['login'], config['password'])
+    s.sendmail(from_email, m['to'], msg.as_string())
+    s.quit()
+
+
 def start(config):
-    scanner = EmailScanner(config)
-    scanner.start()
+    emailer = Emailer(config)
+    emailer.start()
