@@ -58,8 +58,10 @@ config = load_config()
 config["global"]["cwd"] = os.getcwd()
 app.config["app"] = config
 
-# start email scanner thread
-scanemail.start(config)
+# if we have to push incoming emails
+# then we start email inbox polling thread 
+if config['global']['post_urls']:
+    scanemail.start(config)
 
 app.wsgi_app = ProxyFix(app.wsgi_app)
 

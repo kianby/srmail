@@ -41,5 +41,12 @@ def get_message(index):
     return jsonify(**msg)
 
 
+@app.route('/testing/post', methods=['POST'])
+def post_url():
+    # Sample POST URL for testing purpose 
+    logger.info(request.json)
+    # Return an error status code to prevent from deleting the message
+    return ('internal error', 500, )
+
 def init():
     pass

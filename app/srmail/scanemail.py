@@ -5,6 +5,8 @@ import time
 from threading import Thread
 import logging
 import re
+import requests 
+import json
 from srmail import imap
 
 logger = logging.getLogger(__name__)
@@ -30,10 +32,11 @@ class EmailScanner(Thread):
             try:
                 with imap.Mailbox(self.app_config) as mbox:
                     count = mbox.get_count()
-                    #logger.debug('check inbox: %d email(s)' % count)
+                    logger.debug('check inbox: %d email(s)' % count)
                     for num in range(count):
                         msg = mbox.fetch_message_as_json(num + 1)
-                        #process(mbox, msg_num, msg)
+                        process(mbox, msg,
+                        self.app_config['global']['post_urls'])
 
             except:
                 logger.exception("main loop exception")
@@ -44,19 +47,21 @@ class EmailScanner(Thread):
         self.is_running = False
 
 
-def process(mbox, msg_num, msg):
+def process(mbox, msg, post_urls):
 
-    # log message
-    logger.info('%s Message %d %s' % ('-' * 30, msg_num, '-' * 30))
-    for key in msg.keys():
-        logger.info('%s = %s' % (key, msg[key]))
+    headers = {'Content-Type': 'application/json; charset=utf-8'}
 
-    msg['type'] = 'reply_comment_email'
-    # TODO notify listeners
-    #processor.enqueue(msg)
+    for url in post_urls:
 
-    # delete message
-    #mbox.delete_message(msg_num)
+        try:
+            r = requests.post(url, data=json.dumps(msg), headers=headers)
+            if r.status_code in (200, 201):
+                mbox.delete_message(msg['index'])
+            else:
+                logger.warn('bad status %d, keep message until next polling ' %
+                        r.status_code)
+        except:
+            logger.exception('cannot post to %s' % url)
 
 
 def start(config):
