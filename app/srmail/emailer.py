@@ -52,19 +52,19 @@ class Emailer(Thread):
 
 def process(mbox, msg, post_urls):
 
-    headers = {'Content-Type': 'application/json; charset=utf-8'}
-
-    for url in post_urls:
-
-        try:
+    try:
+        headers = {'Content-Type': 'application/json; charset=utf-8'}
+        is_success = True
+        for url in post_urls:
             r = requests.post(url, data=json.dumps(msg), headers=headers)
-            if r.status_code in (200, 201):
-                mbox.delete_message(msg['index'])
-            else:
+            if r.status_code not  in (200, 201):
+                is_success = False
                 logger.warn('bad status %d, keep message until next polling ' %
-                        r.status_code)
-        except:
-            logger.exception('cannot post to %s' % url)
+                        r.status_code)        
+        if is_success:
+            mbox.delete_message(msg['index'])
+    except:
+        logger.exception('cannot post to %s' % url)
 
 
 def mail(config, m):
