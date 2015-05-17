@@ -38,9 +38,9 @@ class Emailer(Thread):
                     logger.debug('check inbox: %d email(s)' % count)
                     for num in range(count):
                         msg = mbox.fetch_message_as_json(num + 1)
-                        process(mbox, msg,
-                        self.app_config['global']['post_urls'])
-
+                        if process(mbox, msg, self.app_config['global']['post_urls']):
+                            mbox.delete_message(msg['index'])
+                        break
             except:
                 logger.exception("main loop exception")
 
@@ -52,19 +52,20 @@ class Emailer(Thread):
 
 def process(mbox, msg, post_urls):
 
+    is_success = True
     try:
         headers = {'Content-Type': 'application/json; charset=utf-8'}
-        is_success = True
         for url in post_urls:
             r = requests.post(url, data=json.dumps(msg), headers=headers)
             if r.status_code not  in (200, 201):
-                is_success = False
                 logger.warn('bad status %d, keep message until next polling ' %
-                        r.status_code)        
-        if is_success:
-            mbox.delete_message(msg['index'])
+                        r.status_code)
+                is_success = False
+                break
     except:
         logger.exception('cannot post to %s' % url)
+        is_success = False
+    return is_success
 
 
 def mail(config, m):
