@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-import re
 import time
 from threading import Thread
 import logging
-import requests 
+import requests
 import json
 import smtplib
 from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from srmail import imap
 
 logger = logging.getLogger(__name__)
@@ -20,7 +18,6 @@ class Emailer(Thread):
     def __init__(self, config):
         super(Emailer, self).__init__()
         self.app_config = config
-
 
     def stop(self):
         logger.info("stop requested")
@@ -38,7 +35,8 @@ class Emailer(Thread):
                     logger.debug('check inbox: %d email(s)' % count)
                     for num in range(count):
                         msg = mbox.fetch_message_as_json(num + 1)
-                        if process(mbox, msg, self.app_config['global']['post_urls']):
+                        if process(mbox, msg,
+                                   self.app_config['global']['post_urls']):
                             mbox.delete_message(msg['index'])
                         break
             except:
@@ -57,9 +55,9 @@ def process(mbox, msg, post_urls):
         headers = {'Content-Type': 'application/json; charset=utf-8'}
         for url in post_urls:
             r = requests.post(url, data=json.dumps(msg), headers=headers)
-            if r.status_code not  in (200, 201):
+            if r.status_code not in (200, 201):
                 logger.warn('bad status %d, keep message until next polling ' %
-                        r.status_code)
+                            r.status_code)
                 is_success = False
                 break
     except:
@@ -75,19 +73,17 @@ def mail(config, m):
         from_email = m['from']
 
     # Create the container (outer) email message.
-    msg = MIMEMultipart()
+    msg = MIMEText(m['content'])
     msg['Subject'] = m['subject']
     msg['To'] = m['to']
     msg['From'] = from_email
-    msg.preamble = m['subject']
-    part = MIMEText(m['content'], 'plain')
-    msg.attach(part)
 
     s = smtplib.SMTP(config['host'], config['port'])
     if config['starttls']:
         s.starttls()
     s.login(config['login'], config['password'])
-    s.sendmail(from_email, m['to'], msg.as_string())
+    # s.sendmail(from_email, m['to'], msg.as_bytes())
+    s.send_message(msg)
     s.quit()
 
 
