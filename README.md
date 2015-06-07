@@ -85,7 +85,8 @@ renumbers other inbox messages.
 POST /mbox => 200 (Ok) or 500 (Internal Server Error)
 
     curl -X POST -H "Content-Type: application/json; charset=utf-8" 
-         -d '{"to":"bill@phoenix.com", "subject":"Got it", "content":"See you soon!\n\n-- John"}'
+         -d '{"to":"bill@phoenix.com", "subject":"Got it", 
+              "content":"See you soon!\n\n-- John"}'
          http://localhost:8000/mbox
     => 200
 
