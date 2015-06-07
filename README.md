@@ -1,12 +1,18 @@
 ## Simple RESTful Mailer
 
-Small piece of code providing a simple way to send and receive emails via a RESTful API. Because of security considerations, SRMail is likely to listen on localhost and provide e-mail services to other applications running on the same host. For that purpose SRMail needs access to an email account via IMAP and SMTP. 
+Small piece of code providing a simple way to send and receive emails via a
+RESTful API. Because of security considerations, SRMail is likely to listen on
+localhost and provide e-mail services to other applications running on the same
+host. For that purpose SRMail manages an email account via IMAP and SMTP.
 
 SRMail is written in Python 3.
 
 ### Configuration 
 
-Configuration is a JSON file having *global*, *imap*, *smtp* and *http* sections. **polling** is IMAP inbox polling in seconds. It is used when new e-mails are posted to several registered clients defined in **post_urls**. If no client is defined e-mail polling is disabled.    
+Configuration is a JSON file having *global*, *imap*, *smtp* and *http*
+sections. **polling** is IMAP inbox polling in seconds. It is used when new
+e-mails are posted to several registered clients defined in **post_urls**. If
+no client is defined e-mail polling is disabled.    
 
     { 
       "global" : {
@@ -71,12 +77,16 @@ Attachments are stored in a separate attribute named 'attachments'.
 
 DELETE /mbox/\<index\> => 200 (Ok) or 500 (Internal Server Error)
 
+Be careful if you intend to delete several messages. Deleting a message 
+renumbers other inbox messages.
+
 **Send a message**
 
 POST /mbox => 200 (Ok) or 500 (Internal Server Error)
 
     curl -X POST -H "Content-Type: application/json; charset=utf-8" 
-         -d '{"to":"bill@phoenix.com", "subject":"Got it", "content":"See you soon!\n\n-- John"}'      
+         -d '{"to":"bill@phoenix.com", "subject":"Got it", "content":"See you soon!\n\n-- John"}'
          http://localhost:8000/mbox
     => 200
-    
+
+A plain-text email is sent.
