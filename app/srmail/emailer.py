@@ -38,7 +38,7 @@ class Emailer(Thread):
                         if process(mbox, msg,
                                    self.app_config['global']['post_urls']):
                             mbox.delete_message(msg['index'])
-                        break
+                            break
             except:
                 logger.exception("main loop exception")
 
