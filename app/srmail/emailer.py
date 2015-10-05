@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import sys
 import time
 from threading import Thread
 import logging
@@ -41,6 +42,8 @@ class Emailer(Thread):
                             break
             except:
                 logger.exception("main loop exception")
+                # exit with 'unexpected' code and expects a restarting from supervisord
+                sys.exit(2)
 
             # check email every <polling> seconds
             time.sleep(self.app_config['global']['polling'])
