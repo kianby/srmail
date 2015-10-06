@@ -2,7 +2,8 @@
     "global" : {
         "lang": "en",
         "polling": 120,
-        "post_urls": []
+        "post_urls": [],
+        "exit_on_error": false
     },
     "imap": {
         "host": "mail.gandi.net",
