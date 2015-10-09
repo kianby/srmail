@@ -27,6 +27,7 @@ class Emailer(Thread):
     def run(self):
 
         exit_on_error = self.app_config['global'].get('exit_on_error', False)
+        logger.info("exit_on_error = %s" % exit_on_error)
         self.is_running = True
 
         while self.is_running:
@@ -44,7 +45,7 @@ class Emailer(Thread):
             except:
                 logger.exception("main loop exception")
                 if exit_on_error:
-                    # exit with 'unexpected' code and expects a restarting from supervisord
+                    logger.warn("exit_on_error enabled: exit with code 2")
                     sys.exit(2)
 
             # check email every <polling> seconds
