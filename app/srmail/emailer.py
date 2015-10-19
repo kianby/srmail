@@ -45,8 +45,8 @@ class Emailer(Thread):
             except:
                 logger.exception("main loop exception")
                 if exit_on_error:
-                    logger.warn("exit_on_error enabled: exit with code 2")
-                    sys.exit(2)
+                    logger.warn("exit_on_error enabled: code 126")
+                    sys.exit(126)
 
             # check email every <polling> seconds
             time.sleep(self.app_config['global']['polling'])
