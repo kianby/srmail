@@ -52,7 +52,12 @@ class Emailer(Thread):
                     sys.exit(error_code)
 
             # check email every <polling> seconds
-            time.sleep(self.app_config['global']['polling'])
+            sleep_time = 0
+            while sleep_time < self.app_config['global']['polling']:
+                if not self.is_running: 
+                    break
+                time.sleep(1)
+                sleep_time = sleep_time + 1
 
         self.is_running = False
 
