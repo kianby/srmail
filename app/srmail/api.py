@@ -77,5 +77,19 @@ def post_url():
     return ('internal error', 500, )
 
 
+def shutdown_server():
+    app.config['app']['runtime']['exit_code'] = 126
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+
+
+@app.route('/shutdown', methods=['POST'])
+def shutdown():
+    shutdown_server()
+    return 'Server shutting down...'
+
+
 def init():
     pass

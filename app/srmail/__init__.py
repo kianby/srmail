@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import os
 import json
 import logging
@@ -15,7 +16,7 @@ def load_config():
     """ load global config from json file
     """
     config_path = os.environ['CONFIG_PATHNAME']
-    logger.info("Load config from %s" % config_path)
+    logger.info('Load config from %s' % config_path)
     with open(config_path, 'rt') as config_file:
         config = json.loads(config_file.read())
         return config
@@ -46,7 +47,7 @@ def get_config(section, param, value=None):
     try:
         value = config[section][param]
     except:
-        logger.warn("missing config param %s.%s" % (section, param))
+        logger.warn('missing config param %s.%s' % (section, param))
     return value
 
 # configure logging
@@ -55,13 +56,16 @@ configure_logging(logging.DEBUG)
 
 # configure flask
 config = load_config()
-config["global"]["cwd"] = os.getcwd()
-app.config["app"] = config
+config['global']['cwd'] = os.getcwd()
+config['runtime'] = {}
+config['runtime']['exit_code'] = 0
+app.config['app'] = config
 
 # if we have to push incoming emails
 # then we start email inbox polling thread 
+mailer = None
 if config['global']['post_urls']:
-    emailer.start(config)
+    mailer = emailer.start(config)
 
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
@@ -69,4 +73,17 @@ app.wsgi_app = ProxyFix(app.wsgi_app)
 from srmail import api
 api.init()
 
-logger.info("Start SRMAIL application")
+logger.info('Starting SRMAIL application')
+
+app.run(host=config['http']['host'],
+        port=config['http']['port'],
+        debug=False, use_reloader=False)
+
+# Exit application
+if mailer:
+    mailer.stop()
+exit_code = config['runtime']['exit_code']
+logger.info('Stopping SRMAIL application (%d)' % exit_code)
+sys.exit(exit_code)
+
+

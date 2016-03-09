@@ -45,8 +45,11 @@ class Emailer(Thread):
             except:
                 logger.exception("main loop exception")
                 if exit_on_error:
-                    logger.warn("exit_on_error enabled: code 126")
-                    sys.exit(126)
+                    error_code = 126
+                    shutdown_url = 'http://%s:%d/shutdown' % (self.app_config['http']['host'], self.app_config['http']['port'])
+                    logger.warn("exit_on_error enabled: code %d (%s)" % (error_code, shutdown_url))
+                    r = requests.post(shutdown_url)
+                    sys.exit(error_code)
 
             # check email every <polling> seconds
             time.sleep(self.app_config['global']['polling'])
@@ -96,3 +99,5 @@ def mail(config, m):
 def start(config):
     emailer = Emailer(config)
     emailer.start()
+    return emailer
+
