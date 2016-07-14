@@ -30,7 +30,8 @@ def configure_logging(level):
     ch.setLevel(level)
 
     # create formatter
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s'
+                                  ' - %(message)s')
 
     # add formatter to ch
     ch.setFormatter(formatter)
@@ -61,15 +62,12 @@ config['runtime'] = {}
 config['runtime']['exit_code'] = 0
 app.config['app'] = config
 
-# if we have to push incoming emails
-# then we start email inbox polling thread 
-mailer = None
-if config['global']['post_urls']:
-    mailer = emailer.start(config)
+# we start email inbox polling thread
+mailer = emailer.start(config)
 
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
-# initialize API 
+# initialize API
 from srmail import api
 api.init()
 
@@ -85,5 +83,3 @@ if mailer:
 exit_code = config['runtime']['exit_code']
 logger.info('Stopping SRMAIL application (%d)' % exit_code)
 sys.exit(exit_code)
-
-

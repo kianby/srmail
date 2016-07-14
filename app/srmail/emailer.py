@@ -3,6 +3,7 @@
 
 import sys
 import time
+import re
 from threading import Thread
 import logging
 import requests
@@ -38,23 +39,18 @@ class Emailer(Thread):
                     logger.debug('check inbox: %d email(s)' % count)
                     for num in range(count):
                         msg = mbox.fetch_message_as_json(num + 1)
-                        if process(mbox, msg,
-                                   self.app_config['global']['post_urls']):
+                        if process(mbox, msg, self.app_config['post']):
                             mbox.delete_message(msg['index'])
                             break
             except:
                 logger.exception("main loop exception")
                 if exit_on_error:
-                    error_code = 126
-                    shutdown_url = 'http://%s:%d/shutdown' % (self.app_config['http']['host'], self.app_config['http']['port'])
-                    logger.warn("exit_on_error enabled: code %d (%s)" % (error_code, shutdown_url))
-                    r = requests.post(shutdown_url)
-                    sys.exit(error_code)
+                    stop_on_error(self.app_config['http'])
 
             # check email every <polling> seconds
             sleep_time = 0
             while sleep_time < self.app_config['global']['polling']:
-                if not self.is_running: 
+                if not self.is_running:
                     break
                 time.sleep(1)
                 sleep_time = sleep_time + 1
@@ -62,22 +58,43 @@ class Emailer(Thread):
         self.is_running = False
 
 
-def process(mbox, msg, post_urls):
+def stop_on_error(http):
+    error_code = 126
+    shutdown_url = 'http://%s:%d/shutdown' % (http['host'], http['port'])
+    logger.warn("exit_on_error enabled: code %d (%s)" % (error_code,
+                                                         shutdown_url))
+    r = requests.post(shutdown_url)
+    sys.exit(error_code)
 
-    is_success = True
+
+def process(mbox, msg, post):
+
+    logger.info('Process msg with post config: %s' % post)
+    processed = False
+    recipient_found = False
+    for route in post['routing']:
+        if re.match(route['regex'], msg['subject'], re.I):
+            recipient_found = True
+            processed = post_msg(route['url'], msg)
+    if not recipient_found and post['default']:
+        processed = post_msg(post['default'], msg)
+    return processed
+
+
+def post_msg(url, msg):
+
+    posted = False
     try:
         headers = {'Content-Type': 'application/json; charset=utf-8'}
-        for url in post_urls:
-            r = requests.post(url, data=json.dumps(msg), headers=headers)
-            if r.status_code not in (200, 201):
-                logger.warn('bad status %d, keep message until next polling ' %
-                            r.status_code)
-                is_success = False
-                break
+        r = requests.post(url, data=json.dumps(msg), headers=headers)
+        if r.status_code not in (200, 201):
+            logger.warn('bad status %d keep message until '
+                        'next polling ' % r.status_code)
+        else:
+            posted = True
     except:
         logger.exception('cannot post to %s' % url)
-        is_success = False
-    return is_success
+    return posted
 
 
 def mail(config, m):
@@ -105,4 +122,3 @@ def start(config):
     emailer = Emailer(config)
     emailer.start()
     return emailer
-

@@ -7,18 +7,18 @@ host. For that purpose SRMail manages an email account via IMAP and SMTP.
 
 SRMail is written in Python 3.
 
-### Configuration 
+### Configuration
 
 Configuration is a JSON file having *global*, *imap*, *smtp* and *http*
 sections. **polling** is IMAP inbox polling in seconds. It is used when new
 e-mails are posted to several registered clients defined in **post_urls**. If
 no client is defined e-mail polling is disabled.    
 
-    { 
+    {
       "global" : {
         "lang": "en",
         "polling": 120,
-        "post_urls": []
+        "exit_on_error": true
       },
       "imap": {
         "host": "mail.gandi.net",
@@ -37,6 +37,19 @@ no client is defined e-mail polling is disabled.
       "http": {
         "host": "127.0.0.1",
         "port": 8000
+      },
+      "post": {
+          "default": "http://localhost:2222/defaultposting",
+          "routing": [
+              {
+                   "regex": "diaspo.*",                  
+                   "url": "http://localhost:7777/postmail"
+              },
+              {
+                   "regex": "contact",
+                   "url": "http://localhost:7755/postmail"
+              },  
+          ]
       }
     }
 
@@ -46,14 +59,14 @@ no client is defined e-mail polling is disabled.
 
 GET /mbox => count as JSON
 
-    curl http://localhost:8000/mbox 
+    curl http://localhost:8000/mbox
     => {"count": 3}
 
 **Read a message**
 
 GET /mbox/\<index\> => message as JSON
 
-    curl http://localhost:8000/mbox/1 
+    curl http://localhost:8000/mbox/1
     =>
     {
       "datetime": "2015-04-26 20:21:38",
@@ -77,15 +90,15 @@ Attachments are stored in a separate attribute named 'attachments'.
 
 DELETE /mbox/\<index\> => 200 (Ok) or 500 (Internal Server Error)
 
-Be careful if you intend to delete several messages. Deleting a message 
+Be careful if you intend to delete several messages. Deleting a message
 renumbers other inbox messages.
 
 **Send a message**
 
 POST /mbox => 200 (Ok) or 500 (Internal Server Error)
 
-    curl -X POST -H "Content-Type: application/json; charset=utf-8" 
-         -d '{"to":"bill@phoenix.com", "subject":"Got it", 
+    curl -X POST -H "Content-Type: application/json; charset=utf-8"
+         -d '{"to":"bill@phoenix.com", "subject":"Got it",
               "content":"See you soon!\n\n-- John"}'
          http://localhost:8000/mbox
     => 200
