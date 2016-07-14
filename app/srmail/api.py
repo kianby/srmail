@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 def jsonify(status=200, indent=4, sort_keys=True, **kwargs):
-    response = make_response(dumps(dict(**kwargs), indent=indent, sort_keys=sort_keys))
+    response = make_response(dumps(dict(**kwargs), indent=indent,
+                             sort_keys=sort_keys))
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     response.headers['mimetype'] = 'application/json'
     response.status_code = status
@@ -69,14 +70,6 @@ def delete_message(index):
     return ('deleted', status_code)
 
 
-@app.route('/testing/post', methods=['POST'])
-def post_url():
-    # Sample POST URL for testing purpose 
-    logger.info(request.json)
-    # Return an error status code to prevent from deleting the message
-    return ('internal error', 500, )
-
-
 def shutdown_server():
     app.config['app']['runtime']['exit_code'] = 126
     func = request.environ.get('werkzeug.server.shutdown')
@@ -89,6 +82,22 @@ def shutdown_server():
 def shutdown():
     shutdown_server()
     return 'Server shutting down...'
+
+
+@app.route('/testing/postdefault', methods=['POST'])
+def post_default():
+    # Sample POST URL for testing purpose
+    logger.info('default post: %s' % request.json)
+    # Return an error status code to prevent from deleting the message
+    return ('internal error', 500, )
+
+
+@app.route('/testing/postregex', methods=['POST'])
+def post_regex():
+    # Sample POST URL for testing purpose
+    logger.info('regex post: %s' % request.json)
+    # Return an error status code to prevent from deleting the message
+    return ('internal error', 500, )
 
 
 def init():

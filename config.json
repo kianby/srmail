@@ -1,8 +1,7 @@
-{ 
+{
     "global" : {
         "lang": "en",
         "polling": 120,
-        "post_urls": [],
         "exit_on_error": false
     },
     "imap": {
@@ -22,5 +21,9 @@
     "http": {
         "host": "127.0.0.1",
         "port": 8000
+    },
+    "post": {
+        "default": "",
+        "routing": []
     }
 }

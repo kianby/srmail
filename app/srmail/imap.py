@@ -8,7 +8,9 @@ import base64
 import re
 import datetime
 
-filename_re = re.compile("filename=\"(.+)\"|filename=([^;\n\r\"\']+)", re.I|re.S)
+filename_re = re.compile("filename=\"(.+)\"|filename=([^;\n\r\"\']+)",
+                         re.I | re.S)
+
 
 class Mailbox(object):
 
@@ -44,28 +46,18 @@ class Mailbox(object):
         email_msg = email.message_from_bytes(data[0][1])
         return email_msg
 
-    def _parse_date(self, v):
-        if v is None:
-            return datetime.datetime.now()
-
-        tt = email.utils.parsedate_tz(v)
-
-        if tt is None:
-            return datetime.datetime.now()
-
-        timestamp = email.utils.mktime_tz(tt)
-        date = datetime.datetime.fromtimestamp(timestamp)
-        return date
-
     def fetch_message_as_json(self, num):
+
         msg = self.fetch_message(num)
         json_msg = {}
         json_msg['encoding'] = 'UTF-8'
         json_msg['index'] = num
-        json_msg['datetime'] = self._parse_date(msg['Date']).strftime("%Y-%m-%d %H:%M:%S")
+        dt = parse_date(msg['Date']).strftime('%Y-%m-%d %H:%M:%S')
+        json_msg['datetime'] = dt
         json_msg['from'] = msg['From']
         json_msg['to'] = msg['To']
-        json_msg['subject'] = msg['Subject']
+        subject = email_subject_to_uft8(msg['Subject'])
+        json_msg['subject'] = subject
         parts = []
         attachments = []
         for part in msg.walk():
@@ -80,7 +72,11 @@ class Mailbox(object):
                     filename = sorted(r[0])[1]
                 else:
                     filename = "undefined"
-                a = { "filename": filename, "content": base64.b64encode(part.get_payload(decode = True)).decode(), "content-type": part.get_content_type() }
+                content = base64.b64encode(part.get_payload(decode=True))
+                content = content.decode()
+                a = {'filename': filename,
+                     'content': content,
+                     'content-type': part.get_content_type()}
                 attachments.append(a)
             else:
                 part_item = {}
@@ -89,7 +85,7 @@ class Mailbox(object):
                 try:
                     charset = part.get_param('charset', None)
                     if charset:
-                        content = content.decode(charset).encode('UTF-8').decode('UTF-8')
+                        content = to_utf8(content, charset)
                 except:
                     self.logger.exception()
                 part_item['content'] = content
@@ -97,7 +93,7 @@ class Mailbox(object):
                 parts.append(part_item)
         if parts:
             json_msg['parts'] = parts
-        if attachments: 
+        if attachments:
                 json_msg['attachments'] = attachments
         return json_msg
 
@@ -119,3 +115,32 @@ class Mailbox(object):
         for num in reversed(data[0].split()):
             status, data = self.imap.fetch(num, '(RFC822)')
             self.logger.debug('Message %s\n%s\n' % (num, data[0][1]))
+
+
+def parse_date(v):
+    if v is None:
+        return datetime.datetime.now()
+
+    tt = email.utils.parsedate_tz(v)
+
+    if tt is None:
+        return datetime.datetime.now()
+
+    timestamp = email.utils.mktime_tz(tt)
+    date = datetime.datetime.fromtimestamp(timestamp)
+    return date
+
+
+def to_utf8(string, charset):
+    return string.decode(charset).encode('UTF-8').decode('UTF-8')
+
+
+def email_subject_to_uft8(string):
+
+    subject = ''
+    for v, charset in email.header.decode_header(string):
+        if charset is None:
+            subject = subject + v
+        else:
+            subject = subject + to_utf8(v, charset)
+    return subject

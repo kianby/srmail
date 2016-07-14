@@ -4,6 +4,7 @@
 import os
 from clize import clize, run
 
+
 @clize
 def srmail_server(config_pathname):
 
