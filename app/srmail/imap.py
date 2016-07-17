@@ -56,7 +56,7 @@ class Mailbox(object):
         json_msg['datetime'] = dt
         json_msg['from'] = msg['From']
         json_msg['to'] = msg['To']
-        subject = email_subject_to_uft8(msg['Subject'])
+        subject = email_nonascii_to_uft8(msg['Subject'])
         json_msg['subject'] = subject
         parts = []
         attachments = []
@@ -74,7 +74,7 @@ class Mailbox(object):
                     filename = "undefined"
                 content = base64.b64encode(part.get_payload(decode=True))
                 content = content.decode()
-                a = {'filename': filename,
+                a = {'filename': email_nonascii_to_uft8(filename),
                      'content': content,
                      'content-type': part.get_content_type()}
                 attachments.append(a)
@@ -86,6 +86,8 @@ class Mailbox(object):
                     charset = part.get_param('charset', None)
                     if charset:
                         content = to_utf8(content, charset)
+                    elif type(content) == bytes:
+                        content = content.decode('utf8')
                 except:
                     self.logger.exception()
                 part_item['content'] = content
@@ -135,8 +137,10 @@ def to_utf8(string, charset):
     return string.decode(charset).encode('UTF-8').decode('UTF-8')
 
 
-def email_subject_to_uft8(string):
+def email_nonascii_to_uft8(string):
 
+    # RFC 1342 is a recommendation that provides a way to represent non ASCII
+    # characters inside e-mail in a way that won’t confuse e-mail servers
     subject = ''
     for v, charset in email.header.decode_header(string):
         if charset is None:

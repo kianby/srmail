@@ -11,8 +11,7 @@ SRMail is written in Python 3.
 
 Configuration is a JSON file having *global*, *imap*, *smtp* and *http*
 sections. **polling** is IMAP inbox polling in seconds. It is used when new
-e-mails are posted to several registered clients defined in **post_urls**. If
-no client is defined e-mail polling is disabled.    
+e-mails are posted to RESTful clients defined in **post** section.    
 
     {
       "global" : {
