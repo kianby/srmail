@@ -69,7 +69,7 @@ def stop_on_error(http):
 
 def process(mbox, msg, post):
 
-    logger.info('Process msg with post config: %s' % post)
+    logger.info('Process msg [%s] with post config: %s' % (msg, post))
     processed = False
     recipient_found = False
     for route in post['routing']:
