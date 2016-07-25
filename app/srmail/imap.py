@@ -90,6 +90,8 @@ class Mailbox(object):
                         content = content.decode('utf8')
                 except:
                     self.logger.exception()
+                # RFC 3676: remove automatic word-wrapping
+                content = content.replace(' \r\n',' ')
                 part_item['content'] = content
                 part_item['content-type'] = content_type
                 parts.append(part_item)
