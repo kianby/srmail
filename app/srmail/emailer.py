@@ -41,7 +41,7 @@ class Emailer(Thread):
                         msg = mbox.fetch_message_as_json(num + 1)
                         if process(mbox, msg, self.app_config['post']):
                             mbox.delete_message(msg['index'])
-                            break
+                            time.sleep(10)
             except:
                 logger.exception("main loop exception")
                 if exit_on_error:
