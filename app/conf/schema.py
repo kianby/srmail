@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# Created with https://jsonschema.net
+#   Object options : required
+
 json_schema = """
 {
   "definitions": {}, 
