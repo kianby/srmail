@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 
 import sys
-import sched
 import time
 import re
 from threading import Thread
@@ -11,6 +10,7 @@ import requests
 import json
 import smtplib
 from email.mime.text import MIMEText
+from conf import config
 from srmail import imap
 
 logger = logging.getLogger(__name__)
@@ -18,9 +18,8 @@ logger = logging.getLogger(__name__)
 
 class Emailer(Thread):
 
-    def __init__(self, config):
+    def __init__(self):
         super(Emailer, self).__init__()
-        self.app_config = config
 
     def stop(self):
         logger.info("stop requested")
@@ -28,29 +27,29 @@ class Emailer(Thread):
 
     def run(self):
 
-        exit_on_error = self.app_config['global'].get('exit_on_error', False)
+        exit_on_error = config.general.get('exit_on_error', False)
         logger.info("exit_on_error = %s" % exit_on_error)
         self.is_running = True
 
         while self.is_running:
 
             try:
-                with imap.Mailbox(self.app_config) as mbox:
+                with imap.Mailbox() as mbox:
                     count = mbox.get_count()
                     logger.debug('check inbox: %d email(s)' % count)
                     for num in range(count):
                         msg = mbox.fetch_message_as_json(num + 1)
-                        if process(mbox, msg, self.app_config['post']):
+                        if process(mbox, msg, config.post):
                             mbox.delete_message(msg['index'])
                             time.sleep(10)
             except:
                 logger.exception("main loop exception")
                 if exit_on_error:
-                    stop_on_error(self.app_config['http'])
+                    stop_on_error()
 
             # check email every <polling> seconds
             sleep_time = 0
-            while sleep_time < self.app_config['global']['polling']:
+            while sleep_time < config.general['polling']:
                 if not self.is_running:
                     break
                 time.sleep(1)
@@ -59,9 +58,9 @@ class Emailer(Thread):
         self.is_running = False
 
 
-def stop_on_error(http):
+def stop_on_error():
     error_code = 126
-    shutdown_url = 'http://%s:%d/shutdown' % (http['host'], http['port'])
+    shutdown_url = 'http://%s:%d/shutdown' % (config.http['host'], config.http['port'])
     logger.warn("exit_on_error enabled: code %d (%s)" % (error_code,
                                                          shutdown_url))
     r = requests.post(shutdown_url)
@@ -98,9 +97,9 @@ def post_msg(url, msg):
     return posted
 
 
-def mail(config, m):
+def mail(m):
 
-    from_email = config['login']
+    from_email = config.smtp['login']
     if 'from' in m:
         from_email = m['from']
 
@@ -110,22 +109,16 @@ def mail(config, m):
     msg['To'] = m['to']
     msg['From'] = from_email
 
-    s = smtplib.SMTP(config['host'], config['port'])
+    s = smtplib.SMTP(config.smtp['host'], config.smtp['port'])
     if config['starttls']:
         s.starttls()
-    s.login(config['login'], config['password'])
+    s.login(config.smtp['login'], config.smtp['password'])
     # s.sendmail(from_email, m['to'], msg.as_bytes())
     s.send_message(msg)
     s.quit()
 
 
-def start(config):
-    #scheduler = sched.scheduler(time.time, time.sleep)
-    #scheduler.enter(self.app_config['global']['polling'], 1, fetch_and_delete)
-    #scheduler.run()
-    
-    # TODO delete
-    #emailer = Emailer(config)
-    #emailer.start()
-    #return emailer
-    pass
+def start():
+    emailer = Emailer()
+    emailer.start()
+    return emailer

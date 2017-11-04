@@ -7,6 +7,7 @@ import logging
 import base64
 import re
 import datetime
+from conf import config
 
 filename_re = re.compile("filename=\"(.+)\"|filename=([^;\n\r\"\']+)",
                          re.I | re.S)
@@ -14,21 +15,15 @@ filename_re = re.compile("filename=\"(.+)\"|filename=([^;\n\r\"\']+)",
 
 class Mailbox(object):
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self):
         self.logger = logging.getLogger(__name__)
 
     def __enter__(self):
-        host = self.config["imap"]["host"]
-        port = self.config["imap"]["port"]
-        use_ssl = self.config["imap"]["ssl"]
-        if use_ssl:
-            self.imap = imaplib.IMAP4_SSL(host, port)
+        if config.imap['ssl']:
+            self.imap = imaplib.IMAP4_SSL(config.imap['host'], config.imap['port'])
         else:
-            self.imap = imaplib.IMAP4(host, port)
-        login = self.config["imap"]["login"]
-        password = self.config["imap"]["password"]
-        self.imap.login(login, password)
+            self.imap = imaplib.IMAP4(config.imap['host'], config.imap['port'])
+        self.imap.login(config.imap['login'], config.imap['password'])
         return self
 
     def __exit__(self, type, value, traceback):

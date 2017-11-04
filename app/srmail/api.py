@@ -38,7 +38,7 @@ def send_message():
     status_code = 500
     try:
         content = request.json
-        emailer.mail(app.config['app']['smtp'], content)
+        emailer.mail(content)
         status_code = 200
     except:
         logger.exception('mbox exception')
@@ -83,20 +83,5 @@ def shutdown():
     shutdown_server()
     return 'Server shutting down...'
 
-
-@app.route('/testing/postdefault', methods=['POST'])
-def post_default():
-    # Sample POST URL for testing purpose
-    logger.info('default post: %s' % request.json)
-    # Return an error status code to prevent from deleting the message
-    return ('internal error', 500, )
-
-
-@app.route('/testing/postregex', methods=['POST'])
-def post_regex():
-    # Sample POST URL for testing purpose
-    logger.info('regex post: %s' % request.json)
-    # Return an error status code to prevent from deleting the message
-    return ('internal error', 500, )
 
 
