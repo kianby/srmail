@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import sys
+import sched
 import time
 import re
 from threading import Thread
@@ -119,6 +120,12 @@ def mail(config, m):
 
 
 def start(config):
-    emailer = Emailer(config)
-    emailer.start()
-    return emailer
+    #scheduler = sched.scheduler(time.time, time.sleep)
+    #scheduler.enter(self.app_config['global']['polling'], 1, fetch_and_delete)
+    #scheduler.run()
+    
+    # TODO delete
+    #emailer = Emailer(config)
+    #emailer.start()
+    #return emailer
+    pass

@@ -100,5 +100,3 @@ def post_regex():
     return ('internal error', 500, )
 
 
-def init():
-    pass
