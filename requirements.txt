@@ -12,7 +12,6 @@ jsonschema==2.6.0
 MarkupSafe==1.0
 od==1.0
 peewee==2.10.2
-requests==2.18.4
 sigtools==2.0.1
 six==1.11.0
 urllib3==1.22

@@ -6,12 +6,12 @@ import time
 import re
 from threading import Thread
 import logging
-import requests
 import json
 import smtplib
 from email.mime.text import MIMEText
 from conf import config
-from srmail import imap
+from core import imap
+from model.email import Email
 
 logger = logging.getLogger(__name__)
 
@@ -27,8 +27,6 @@ class Emailer(Thread):
 
     def run(self):
 
-        exit_on_error = config.general.get('exit_on_error', False)
-        logger.info("exit_on_error = %s" % exit_on_error)
         self.is_running = True
 
         while self.is_running:
@@ -36,16 +34,16 @@ class Emailer(Thread):
             try:
                 with imap.Mailbox() as mbox:
                     count = mbox.get_count()
-                    logger.debug('check inbox: %d email(s)' % count)
+                    if not count:
+                        continue
+                    logger.debug('inbox: %d email(s)' % count)
                     for num in range(count):
                         msg = mbox.fetch_message_as_json(num + 1)
-                        if process(mbox, msg, config.post):
+                        if persist(msg):
                             mbox.delete_message(msg['index'])
                             time.sleep(10)
             except:
                 logger.exception("main loop exception")
-                if exit_on_error:
-                    stop_on_error()
 
             # check email every <polling> seconds
             sleep_time = 0
@@ -58,43 +56,19 @@ class Emailer(Thread):
         self.is_running = False
 
 
-def stop_on_error():
-    error_code = 126
-    shutdown_url = 'http://%s:%d/shutdown' % (config.http['host'], config.http['port'])
-    logger.warn("exit_on_error enabled: code %d (%s)" % (error_code,
-                                                         shutdown_url))
-    r = requests.post(shutdown_url)
-    sys.exit(error_code)
+def persist(msg):
 
-
-def process(mbox, msg, post):
-
-    logger.info('Process msg [%s] with post config: %s' % (msg, post))
-    processed = False
-    recipient_found = False
-    for route in post['routing']:
-        if re.match(route['regex'], msg['subject'], re.I):
-            recipient_found = True
-            processed = post_msg(route['url'], msg)
-    if not recipient_found and post['default']:
-        processed = post_msg(post['default'], msg)
-    return processed
-
-
-def post_msg(url, msg):
-
-    posted = False
-    try:
-        headers = {'Content-Type': 'application/json; charset=utf-8'}
-        r = requests.post(url, data=json.dumps(msg), headers=headers)
-        if r.status_code not in (200, 201):
-            logger.warn('bad status %d keep message until '
-                        'next polling ' % r.status_code)
-        else:
-            posted = True
-    except:
-        logger.exception('cannot post to %s' % url)
-    return posted
+    logger.info('Persist msg [%s]' % msg)
+    email = Email(
+        e_encoding = msg['encoding'],
+        e_date = msg['datetime'],
+        e_from = msg['from'],
+        e_to = msg['to'],
+        e_subject = msg['subject'],
+        e_parts = msg['parts']
+    )
+    email.save()
+    return True
 
 
 def mail(m):

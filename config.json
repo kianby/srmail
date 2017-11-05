@@ -1,8 +1,7 @@
 {
-    "global" : {
-        "lang": "en",
-        "polling": 120,
-        "exit_on_error": false
+    "general" : {
+        "polling": 60,
+        "db_url" : "sqlite:///db.sqlite"
     },
     "imap": {
         "host": "mail.gandi.net",
@@ -21,9 +20,5 @@
     "http": {
         "host": "127.0.0.1",
         "port": 8000
-    },
-    "post": {
-        "default": "",
-        "routing": []
     }
 }

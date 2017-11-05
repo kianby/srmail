@@ -4,9 +4,9 @@
 import logging
 from flask import request, make_response
 from json import dumps
-from srmail import app
-from srmail import imap
-from srmail import emailer
+from core import app
+from core import imap
+from core import emailer
 
 logger = logging.getLogger(__name__)
 

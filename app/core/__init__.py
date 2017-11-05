@@ -7,7 +7,8 @@ import json
 import logging
 from flask import Flask
 from conf import config
-from srmail import emailer
+from core import emailer
+from core import database
 
 app = Flask(__name__)
 
@@ -36,11 +37,14 @@ configure_logging(logging.DEBUG)
 # set configuration
 config.cwd = os.getcwd()
 
-# we start email inbox polling thread
+# initialize database
+database.setup()
+
+# start emailer service
 mailer = emailer.start()
 
-# import API
-from srmail import api
+# initialize REST API
+from interface import api
 
 logger.info('Starting SRMAIL application')
 
@@ -52,5 +56,5 @@ app.run(host=config.http['host'],
 if mailer:
     mailer.stop()
 
-logger.info('Stopping SRMAIL application (%d)' % config.exit_code)
-sys.exit(config.exit_code)
+logger.info('Stopping SRMAIL application')
+sys.exit(0)

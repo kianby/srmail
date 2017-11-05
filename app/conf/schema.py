@@ -12,39 +12,31 @@ json_schema = """
   "id": "http://example.com/example.json", 
   "additionalProperties": false, 
   "required": [
-    "global", 
+    "general", 
     "imap", 
     "smtp", 
-    "http", 
-    "post"
+    "http"
   ], 
   "properties": {
-    "global": {
+    "general": {
       "type": "object", 
       "additionalProperties": false, 
       "required": [
-        "lang", 
         "polling", 
-        "exit_on_error"
+        "db_url"
       ], 
       "properties": {
-        "lang": {
-          "type": "string", 
-          "title": "The Lang Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": ""
-        }, 
         "polling": {
           "type": "integer", 
           "title": "The Polling Schema.", 
           "description": "An explanation about the purpose of this instance.", 
           "default": 0
         }, 
-        "exit_on_error": {
-          "type": "boolean", 
-          "title": "The Exit_on_error Schema.", 
+        "db_url": {
+          "type": "string", 
+          "title": "The Db_url Schema.", 
           "description": "An explanation about the purpose of this instance.", 
-          "default": false
+          "default": ""
         }
       }
     }, 
@@ -155,33 +147,7 @@ json_schema = """
           "default": 0
         }
       }
-    }, 
-    "post": {
-      "type": "object", 
-      "additionalProperties": false, 
-      "required": [
-        "default", 
-        "routing"
-      ], 
-      "properties": {
-        "default": {
-          "type": "string", 
-          "title": "The Default Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": ""
-        }, 
-        "routing": {
-          "type": "array", 
-          "items": {
-            "id": "kamchatkabear", 
-            "title": "Empty Object", 
-            "description": "This accepts anything, as long as it's valid JSON."
-          }
-        }
-      }
     }
   }
 }
-
-
 """

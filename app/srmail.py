@@ -24,13 +24,13 @@ def srmail_server(config_pathname):
     validate(conf, json_schema)
     
     # set configuration
-    config.general = conf['global']
+    config.general = conf['general']
     config.http = conf['http']
     config.smtp = conf['smtp']
     config.imap = conf['imap']
 
     # start application
-    from srmail import app
+    from core import app
 
 if __name__ == '__main__':
     run(srmail_server)
