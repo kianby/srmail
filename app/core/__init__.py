@@ -3,7 +3,6 @@
 
 import sys
 import os
-import json
 import logging
 from flask import Flask
 from conf import config
@@ -11,6 +10,7 @@ from core import emailer
 from core import database
 
 app = Flask(__name__)
+
 
 def configure_logging(level):
 
@@ -45,6 +45,7 @@ mailer = emailer.start()
 
 # initialize REST API
 from interface import api
+from interface import admin
 
 logger.info('Starting SRMAIL application')
 

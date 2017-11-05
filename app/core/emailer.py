@@ -65,7 +65,7 @@ def persist(msg):
         e_from = msg['from'],
         e_to = msg['to'],
         e_subject = msg['subject'],
-        e_parts = msg['parts']
+        e_content = msg
     )
     email.save()
     return True
