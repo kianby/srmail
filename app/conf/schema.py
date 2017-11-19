@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 # Created with https://jsonschema.net
-#   Object options : required
+#   schema: draft-04
+#   Object options: required
 
 json_schema = """
 {
@@ -130,10 +131,17 @@ json_schema = """
       "type": "object", 
       "additionalProperties": false, 
       "required": [
+        "active",
         "host", 
         "port"
       ], 
       "properties": {
+        "active": {
+          "type": "boolean", 
+          "title": "The Active Schema.", 
+          "description": "An explanation about the purpose of this instance.", 
+          "default": ""
+        },      
         "host": {
           "type": "string", 
           "title": "The Host Schema.", 
@@ -147,7 +155,36 @@ json_schema = """
           "default": 0
         }
       }
-    }
+    },
+    "nsq": {
+      "type": "object", 
+      "additionalProperties": false, 
+      "required": [
+        "active",
+        "host", 
+        "port"
+      ], 
+      "properties": {
+        "active": {
+          "type": "boolean", 
+          "title": "The Active Schema.", 
+          "description": "An explanation about the purpose of this instance.", 
+          "default": ""
+        },       
+        "host": {
+          "type": "string", 
+          "title": "The Host Schema.", 
+          "description": "An explanation about the purpose of this instance.", 
+          "default": ""
+        }, 
+        "port": {
+          "type": "integer", 
+          "title": "The Port Schema.", 
+          "description": "An explanation about the purpose of this instance.", 
+          "default": 0
+        }
+      }
+    }    
   }
 }
 """

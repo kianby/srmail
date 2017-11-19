@@ -46,12 +46,21 @@ mailer = emailer.start()
 # initialize REST API
 from interface import api
 from interface import admin
+from interface import nsqreader
 
 logger.info('Starting SRMAIL application')
 
-app.run(host=config.http['host'],
-        port=config.http['port'],
-        debug=False, use_reloader=False)
+# start NSQ connector
+if( config.nsq['active']):
+    nsqreader.start()
+
+# start HTTP server
+if( config.http['active']):
+    app.run(host=config.http['host'],
+            port=config.http['port'],
+            debug=False, use_reloader=False)
+else:
+    input("\nPress Enter to stop.")
 
 # Exit application
 if mailer:
