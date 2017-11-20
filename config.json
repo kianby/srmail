@@ -23,7 +23,7 @@
         "port": 8000
     },
     "nsq": {
-        "active": true,
+        "active": false,
         "host": "127.0.0.1",
         "port": 4150
     }
