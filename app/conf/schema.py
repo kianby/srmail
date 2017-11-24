@@ -156,13 +156,14 @@ json_schema = """
         }
       }
     },
-    "nsq": {
+    "zmq": {
       "type": "object", 
       "additionalProperties": false, 
       "required": [
         "active",
         "host", 
-        "port"
+        "pub_port",
+        "sub_port"
       ], 
       "properties": {
         "active": {
@@ -177,12 +178,18 @@ json_schema = """
           "description": "An explanation about the purpose of this instance.", 
           "default": ""
         }, 
-        "port": {
+        "pub_port": {
           "type": "integer", 
           "title": "The Port Schema.", 
           "description": "An explanation about the purpose of this instance.", 
           "default": 0
-        }
+        },
+        "sub_port": {
+          "type": "integer", 
+          "title": "The Port Schema.", 
+          "description": "An explanation about the purpose of this instance.", 
+          "default": 0
+        }        
       }
     }    
   }

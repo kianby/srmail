@@ -46,13 +46,13 @@ mailer = emailer.start()
 # initialize REST API
 from interface import api
 from interface import admin
-from interface import nsqreader
+from interface import zconsumer
 
 logger.info('Starting SRMAIL application')
 
 # start NSQ connector
-if( config.nsq['active']):
-    nsqreader.start()
+if( config.zmq['active']):
+    zconsumer.start()
 
 # start HTTP server
 if( config.http['active']):
