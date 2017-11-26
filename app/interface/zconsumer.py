@@ -4,8 +4,9 @@
 import zmq
 from conf import config
 from threading import Thread
+import logging
 
-TOPIC = ''
+logger = logging.getLogger(__name__)
 
 context = zmq.Context()
 
@@ -13,12 +14,12 @@ context = zmq.Context()
 class Consumer(Thread):
 
     def run(self):
-        subscriber = context.socket(zmq.SUB)
-        subscriber.connect('tcp://127.0.0.1:{}'.format(config.zmq['pub_port']))
-        subscriber.setsockopt_string(zmq.SUBSCRIBE, TOPIC)
+        zsub = context.socket(zmq.SUB)
+        zsub.connect('tcp://127.0.0.1:{}'.format(config.zmq['pub_port']))
+        zsub.setsockopt_string(zmq.SUBSCRIBE, '')
         self.loop = True
         while self.loop:
-            message = subscriber.recv()
+            message = zsub.recv()
             logger.info('read {}'.format(message))
 
     def stop(self):

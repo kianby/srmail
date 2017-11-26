@@ -22,6 +22,7 @@ class Email(Model):
         email_dict = ast.literal_eval(self.e_content)
         if 'to' in email_dict:
             del email_dict['to']
+        email_dict['id'] = self.id
         return email_dict
 
     def to_summary_dict(self):

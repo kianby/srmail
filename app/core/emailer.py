@@ -12,8 +12,14 @@ from email.mime.text import MIMEText
 from conf import config
 from core import imap
 from model.email import Email
+import zmq
 
 logger = logging.getLogger(__name__)
+
+if config.zmq['active']:
+    context = zmq.Context()
+    zpub = context.socket(zmq.PUB)
+    zpub.connect('tcp://127.0.0.1:{}'.format(config.zmq['sub_port']))
 
 
 class Emailer(Thread):
@@ -28,6 +34,9 @@ class Emailer(Thread):
     def run(self):
 
         self.is_running = True
+
+        # broadcast stored emails on startup
+        broadcast_zmq()
 
         while self.is_running:
 
@@ -56,18 +65,39 @@ class Emailer(Thread):
         self.is_running = False
 
 
+def broadcast_zmq():
+    if not config.zmq['active']:
+        return
+
+    for email in Email.select():
+        z_msg = email.to_dict()
+        z_msg['topic'] = 'email:newmail'
+        zpub.send_string(json.dumps(z_msg, indent=False, sort_keys=False))
+
+
 def persist(msg):
 
     logger.info('Persist msg [%s]' % msg)
     email = Email(
-        e_encoding = msg['encoding'],
-        e_date = msg['datetime'],
-        e_from = msg['from'],
-        e_to = msg['to'],
-        e_subject = msg['subject'],
-        e_content = msg
+        e_encoding=msg['encoding'],
+        e_date=msg['datetime'],
+        e_from=msg['from'],
+        e_to=msg['to'],
+        e_subject=msg['subject'],
+        e_content=msg
     )
-    email.save()
+    email = email.save()
+
+    for email in Email.select():
+        z_msg = email.to_dict()
+
+    # send message to ZMQ
+    if config.zmq['active']:
+        #z_msg = email.to_dict()
+        del z_msg['index']
+        z_msg['topic'] = 'email:newmail'
+        zpub.send_string(json.dumps(z_msg, indent=False, sort_keys=False))
+
     return True
 
 
