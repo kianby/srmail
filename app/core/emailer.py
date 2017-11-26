@@ -47,7 +47,7 @@ class Emailer(Thread):
                         continue
                     logger.debug('inbox: %d email(s)' % count)
                     for num in range(count):
-                        msg = mbox.fetch_message_as_json(num + 1)
+                        msg = mbox.fetch_message(num + 1)
                         if persist(msg):
                             mbox.delete_message(msg['index'])
                             time.sleep(10)
@@ -78,23 +78,25 @@ def broadcast_zmq():
 def persist(msg):
 
     logger.info('Persist msg [%s]' % msg)
+
+    content = dict(msg)
+    del content['index']
+    del content['to']
+
     email = Email(
-        e_encoding=msg['encoding'],
-        e_date=msg['datetime'],
-        e_from=msg['from'],
-        e_to=msg['to'],
-        e_subject=msg['subject'],
-        e_content=msg
+        encoding=msg['encoding'],
+        date=msg['datetime'],
+        fromaddr=msg['from'],
+        toaddr=msg['to'],
+        subject=msg['subject'],
+        content=content
     )
     email = email.save()
 
-    for email in Email.select():
-        z_msg = email.to_dict()
-
     # send message to ZMQ
     if config.zmq['active']:
-        #z_msg = email.to_dict()
-        del z_msg['index']
+        for email in Email.select():
+            z_msg = email.to_dict()
         z_msg['topic'] = 'email:newmail'
         zpub.send_string(json.dumps(z_msg, indent=False, sort_keys=False))
 

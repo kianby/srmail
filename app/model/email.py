@@ -11,26 +11,23 @@ from core.database import get_db
 
 
 class Email(Model):
-    e_encoding = CharField()
-    e_date = DateTimeField()
-    e_from = CharField()
-    e_to = CharField()
-    e_subject = CharField()
-    e_content = CharField()
+    encoding = CharField()
+    date = DateTimeField()
+    fromaddr = CharField()
+    toaddr = CharField()
+    subject = CharField()
+    content = CharField()
 
     def to_dict(self):
-        email_dict = ast.literal_eval(self.e_content)
-        if 'to' in email_dict:
-            del email_dict['to']
+        email_dict = ast.literal_eval(self.content)
         email_dict['id'] = self.id
         return email_dict
 
     def to_summary_dict(self):
-        email_dict = ast.literal_eval(self.e_content)
-        if 'to' in email_dict:
-            del email_dict['to']
+        email_dict = ast.literal_eval(self.content)
         if 'parts' in email_dict:
             del email_dict['parts']
         return email_dict
+
     class Meta:
         database = get_db()

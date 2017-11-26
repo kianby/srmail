@@ -35,27 +35,27 @@ class Mailbox(object):
         status, data = self.imap.search(None, 'ALL')
         return sum(1 for num in data[0].split())
 
-    def fetch_message(self, num):
+    def fetch_raw_message(self, num):
         self.imap.select('Inbox')
         status, data = self.imap.fetch(str(num), '(RFC822)')
         email_msg = email.message_from_bytes(data[0][1])
         return email_msg
 
-    def fetch_message_as_json(self, num):
+    def fetch_message(self, num):
 
-        msg = self.fetch_message(num)
-        json_msg = {}
-        json_msg['encoding'] = 'UTF-8'
-        json_msg['index'] = num
-        dt = parse_date(msg['Date']).strftime('%Y-%m-%d %H:%M:%S')
-        json_msg['datetime'] = dt
-        json_msg['from'] = msg['From']
-        json_msg['to'] = msg['To']
-        subject = email_nonascii_to_uft8(msg['Subject'])
-        json_msg['subject'] = subject
+        raw_msg = self.fetch_raw_message(num)
+        msg = {}
+        msg['encoding'] = 'UTF-8'
+        msg['index'] = num
+        dt = parse_date(raw_msg['Date']).strftime('%Y-%m-%d %H:%M:%S')
+        msg['datetime'] = dt
+        msg['from'] = raw_msg['From']
+        msg['to'] = raw_msg['To']
+        subject = email_nonascii_to_uft8(raw_msg['Subject'])
+        msg['subject'] = subject
         parts = []
         attachments = []
-        for part in msg.walk():
+        for part in raw_msg.walk():
             if part.is_multipart():
                 continue
 
@@ -91,10 +91,10 @@ class Mailbox(object):
                 part_item['content-type'] = content_type
                 parts.append(part_item)
         if parts:
-            json_msg['parts'] = parts
+            msg['parts'] = parts
         if attachments:
-                json_msg['attachments'] = attachments
-        return json_msg
+            msg['attachments'] = attachments
+        return msg
 
     def delete_message(self, num):
         self.imap.select('Inbox')
