@@ -60,4 +60,5 @@ docs/_build/
 target/
 
 # Add project specific files
-myconfig.json
+config-dev.json
+db.sqlite
