@@ -16,7 +16,7 @@ def load_json(filename):
 
 
 @clize
-def srmail_server(config_pathname='/etc/srmail.conf'):
+def srmail_server(config_pathname):
 
     # load and validate startup config
     conf = load_json(config_pathname)
