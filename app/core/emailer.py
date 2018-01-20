@@ -71,7 +71,7 @@ def broadcast_zmq():
 
     for email in Email.select():
         z_msg = email.to_dict()
-        z_msg['topic'] = 'email:newmail'
+        z_msg['topic'] = 'email:mail'
         zpub.send_string(json.dumps(z_msg, indent=False, sort_keys=False))
 
 
@@ -97,7 +97,7 @@ def persist(msg):
     if config.zmq['active']:
         for email in Email.select():
             z_msg = email.to_dict()
-        z_msg['topic'] = 'email:newmail'
+        z_msg['topic'] = 'email:mail'
         zpub.send_string(json.dumps(z_msg, indent=False, sort_keys=False))
 
     return True

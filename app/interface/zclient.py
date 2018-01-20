@@ -7,18 +7,19 @@ import zmq
 from threading import Thread
 from conf import config
 from core import emailer
+from model.email import Email
 
 logger = logging.getLogger(__name__)
 
 
 def process(message):
     data = json.loads(message)
-    if data['topic'] == 'email:sendmail':
+    if data['topic'] == 'email:send':
         logger.info('send mail => {}'.format(data))
         emailer.mail(data)
     elif data['topic'] == 'email:delete':
         logger.info('delete mail => {}'.format(data))
-        email = Email.select().where(id=data['id'])
+        email = Email.get(Email.id ==data['id'])
         if email is None:
             logger.info('cannot retrieve email {}'.format(data))
         else:
