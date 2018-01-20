@@ -116,7 +116,7 @@ def mail(m):
     msg['From'] = from_email
 
     s = smtplib.SMTP(config.smtp['host'], config.smtp['port'])
-    if config['starttls']:
+    if config.smtp['starttls']:
         s.starttls()
     s.login(config.smtp['login'], config.smtp['password'])
     # s.sendmail(from_email, m['to'], msg.as_bytes())

@@ -1,197 +1,152 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Created with https://jsonschema.net
-#   schema: draft-04
-#   Object options: required
+# Created with https://app.quicktype.io
+#   name: srmail
 
 json_schema = """
 {
-  "definitions": {}, 
-  "$schema": "http://json-schema.org/draft-04/schema#", 
-  "type": "object", 
-  "id": "http://example.com/example.json", 
-  "additionalProperties": false, 
-  "required": [
-    "general", 
-    "imap", 
-    "smtp", 
-    "http"
-  ], 
-  "properties": {
-    "general": {
-      "type": "object", 
-      "additionalProperties": false, 
-      "required": [
-        "polling", 
-        "db_url"
-      ], 
-      "properties": {
-        "polling": {
-          "type": "integer", 
-          "title": "The Polling Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": 0
-        }, 
-        "db_url": {
-          "type": "string", 
-          "title": "The Db_url Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": ""
-        }
-      }
-    }, 
-    "imap": {
-      "type": "object", 
-      "additionalProperties": false, 
-      "required": [
-        "host", 
-        "ssl", 
-        "port", 
-        "login", 
-        "password"
-      ], 
-      "properties": {
-        "host": {
-          "type": "string", 
-          "title": "The Host Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": ""
-        }, 
-        "ssl": {
-          "type": "boolean", 
-          "title": "The Ssl Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": false
-        }, 
-        "port": {
-          "type": "integer", 
-          "title": "The Port Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": 0
-        }, 
-        "login": {
-          "type": "string", 
-          "title": "The Login Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": ""
-        }, 
-        "password": {
-          "type": "string", 
-          "title": "The Password Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": ""
-        }
-      }
-    }, 
-    "smtp": {
-      "type": "object", 
-      "additionalProperties": false, 
-      "required": [
-        "host", 
-        "starttls", 
-        "port", 
-        "login", 
-        "password"
-      ], 
-      "properties": {
-        "host": {
-          "type": "string", 
-          "title": "The Host Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": ""
-        }, 
-        "starttls": {
-          "type": "boolean", 
-          "title": "The Starttls Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": false
-        }, 
-        "port": {
-          "type": "integer", 
-          "title": "The Port Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": 0
-        }, 
-        "login": {
-          "type": "string", 
-          "title": "The Login Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": ""
-        }, 
-        "password": {
-          "type": "string", 
-          "title": "The Password Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": ""
-        }
-      }
-    }, 
-    "http": {
-      "type": "object", 
-      "additionalProperties": false, 
-      "required": [
-        "active",
-        "host", 
-        "port"
-      ], 
-      "properties": {
-        "active": {
-          "type": "boolean", 
-          "title": "The Active Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": ""
-        },      
-        "host": {
-          "type": "string", 
-          "title": "The Host Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": ""
-        }, 
-        "port": {
-          "type": "integer", 
-          "title": "The Port Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": 0
-        }
-      }
-    },
-    "zmq": {
-      "type": "object", 
-      "additionalProperties": false, 
-      "required": [
-        "active",
-        "host", 
-        "pub_port",
-        "sub_port"
-      ], 
-      "properties": {
-        "active": {
-          "type": "boolean", 
-          "title": "The Active Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": ""
-        },       
-        "host": {
-          "type": "string", 
-          "title": "The Host Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": ""
-        }, 
-        "pub_port": {
-          "type": "integer", 
-          "title": "The Port Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": 0
+    "$ref": "#/definitions/Srmail",
+    "definitions": {
+        "Srmail": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "general": {
+                    "$ref": "#/definitions/General"
+                },
+                "imap": {
+                    "$ref": "#/definitions/IMAP"
+                },
+                "smtp": {
+                    "$ref": "#/definitions/IMAP"
+                },
+                "http": {
+                    "$ref": "#/definitions/HTTP"
+                },
+                "zmq": {
+                    "$ref": "#/definitions/Zmq"
+                }
+            },
+            "required": [
+                "general",
+                "http",
+                "imap",
+                "smtp",
+                "zmq"
+            ],
+            "title": "srmail"
         },
-        "sub_port": {
-          "type": "integer", 
-          "title": "The Port Schema.", 
-          "description": "An explanation about the purpose of this instance.", 
-          "default": 0
-        }        
-      }
-    }    
-  }
+        "General": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "polling": {
+                    "type": "integer"
+                },
+                "db_url": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "db_url",
+                "polling"
+            ],
+            "title": "general"
+        },
+        "HTTP": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "active",
+                "host",
+                "port"
+            ],
+            "title": "http"
+        },
+        "IMAP": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "host": {
+                    "type": "string"
+                },
+                "ssl": {
+                    "oneOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "ssl"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "login": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "starttls": {
+                    "oneOf": [
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "ssl"
+                }
+            },
+            "required": [
+                "host",
+                "login",
+                "password",
+                "port"
+            ],
+            "title": "imap"
+        },
+        "Zmq": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "active": {
+                    "type": "boolean"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "pub_port": {
+                    "type": "integer"
+                },
+                "sub_port": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "active",
+                "host",
+                "pub_port",
+                "sub_port"
+            ],
+            "title": "zmq"
+        }
+    }
 }
 """

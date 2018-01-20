@@ -8,26 +8,24 @@ from flask import Flask
 from conf import config
 from core import emailer
 from core import database
+from interface import zclient
 
 app = Flask(__name__)
 
 
+# configure logging
 def configure_logging(level):
-
-    logger.setLevel(level)
-
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
     ch = logging.StreamHandler()
     ch.setLevel(level)
-
     # create formatter
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s'
-                                  ' - %(message)s')
-
+    formatter = logging.Formatter(
+        '[%(asctime)s] %(name)s %(levelname)s %(message)s')
     # add formatter to ch
     ch.setFormatter(formatter)
-
     # add ch to logger
-    logger.addHandler(ch)
+    root_logger.addHandler(ch)
 
 
 # configure logging
@@ -43,19 +41,18 @@ database.setup()
 # start emailer service
 mailer = emailer.start()
 
+# start ZMQ client
+if(config.zmq['active']):
+    c = zclient.start()
+
 # initialize REST API
 from interface import api
 from interface import admin
-from interface import zclient
 
 logger.info('Starting SRMAIL application')
 
-# start ZMQ client
-if( config.zmq['active']):
-    zclient.start()
-
 # start HTTP server
-if( config.http['active']):
+if(config.http['active']):
     app.run(host=config.http['host'],
             port=config.http['port'],
             debug=False, use_reloader=False)
