@@ -141,6 +141,8 @@ def email_nonascii_to_uft8(string):
     subject = ''
     for v, charset in email.header.decode_header(string):
         if charset is None:
+            if type(v) is bytes:
+                v = v.decode()
             subject = subject + v
         else:
             subject = subject + to_utf8(v, charset)
