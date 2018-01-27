@@ -61,23 +61,29 @@ class Emailer(Thread):
         self.is_running = False
 
 
-def get_rmq_channel():
+def pub_rabbitmq_mail_messages(emails):
+    if not emails:
+        return
     credentials = pika.PlainCredentials(
         config.rabbitmq['username'], config.rabbitmq['password'])
     connection = pika.BlockingConnection(pika.ConnectionParameters(host=config.rabbitmq['host'], port=config.rabbitmq[
                                          'port'], credentials=credentials, virtual_host=config.rabbitmq['vhost']))
     channel = connection.channel()
-    return channel
+
+    for email in emails:
+        channel.basic_publish(exchange=config.rabbitmq['exchange'],
+                              routing_key='mail.message',
+                              body=json.dumps(email.to_dict(), indent=False, sort_keys=False))
+    connection.close()
 
 
 def broadcast_emails():
     if not config.rabbitmq['active']:
         return
-    channel = get_rmq_channel()
+    emails = []
     for email in Email.select():
-        channel.basic_publish(exchange=config.rabbitmq['exchange'],
-                              routing_key='mail.message',
-                              body=json.dumps(email.to_dict(), indent=False, sort_keys=False))
+        emails.append(email)
+    pub_rabbitmq_mail_messages(emails)
 
 
 def persist(msg):
@@ -88,21 +94,20 @@ def persist(msg):
     del content['index']
     del content['to']
 
+    json_content = json.dumps(content, indent=False, sort_keys=False)
     email = Email(
         encoding=msg['encoding'],
         date=msg['datetime'],
         fromaddr=msg['from'],
         toaddr=msg['to'],
         subject=msg['subject'],
-        content=content
+        content= json_content
     )
-    email = email.save()
+    success = email.save()
 
-    if config.rabbitmq['active']:
-        channel = get_rmq_channel()
-        channel.basic_publish(exchange=config.rabbitmq['exchange'],
-                              routing_key='mail.message',
-                              body=json.dumps(email.to_dict(), indent=False, sort_keys=False))
+    if config.rabbitmq['active'] and success:
+        pub_rabbitmq_mail_messages([email])
+
     return True
 
 
