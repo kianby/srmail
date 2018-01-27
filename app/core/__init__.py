@@ -8,7 +8,7 @@ from flask import Flask
 from conf import config
 from core import emailer
 from core import database
-from interface import zclient
+from interface import rmqclient
 
 app = Flask(__name__)
 
@@ -30,7 +30,7 @@ def configure_logging(level):
 
 # configure logging
 logger = logging.getLogger(__name__)
-configure_logging(logging.DEBUG)
+configure_logging(logging.INFO)
 
 # set configuration
 config.cwd = os.getcwd()
@@ -38,12 +38,12 @@ config.cwd = os.getcwd()
 # initialize database
 database.setup()
 
+# start ZMQ client
+if(config.rabbitmq['active']):
+    c = rmqclient.start()
+
 # start emailer service
 mailer = emailer.start()
-
-# start ZMQ client
-if(config.zmq['active']):
-    c = zclient.start()
 
 # initialize REST API
 from interface import api

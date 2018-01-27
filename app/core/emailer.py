@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 
 import sys
+import pika
 import time
 import re
 from threading import Thread
@@ -12,14 +13,9 @@ from email.mime.text import MIMEText
 from conf import config
 from core import imap
 from model.email import Email
-import zmq
+
 
 logger = logging.getLogger(__name__)
-
-if config.zmq['active']:
-    context = zmq.Context()
-    zpub = context.socket(zmq.PUB)
-    zpub.connect('tcp://127.0.0.1:{}'.format(config.zmq['sub_port']))
 
 
 class Emailer(Thread):
@@ -36,7 +32,7 @@ class Emailer(Thread):
         self.is_running = True
 
         # broadcast stored emails on startup
-        broadcast_zmq()
+        broadcast_emails()
 
         while self.is_running:
 
@@ -65,14 +61,23 @@ class Emailer(Thread):
         self.is_running = False
 
 
-def broadcast_zmq():
-    if not config.zmq['active']:
-        return
+def get_rmq_channel():
+    credentials = pika.PlainCredentials(
+        config.rabbitmq['username'], config.rabbitmq['password'])
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host=config.rabbitmq['host'], port=config.rabbitmq[
+                                         'port'], credentials=credentials, virtual_host=config.rabbitmq['vhost']))
+    channel = connection.channel()
+    return channel
 
+
+def broadcast_emails():
+    if not config.rabbitmq['active']:
+        return
+    channel = get_rmq_channel()
     for email in Email.select():
-        z_msg = email.to_dict()
-        z_msg['topic'] = 'email:mail'
-        zpub.send_string(json.dumps(z_msg, indent=False, sort_keys=False))
+        channel.basic_publish(exchange=config.rabbitmq['exchange'],
+                              routing_key='mail.message',
+                              body=json.dumps(email.to_dict(), indent=False, sort_keys=False))
 
 
 def persist(msg):
@@ -93,13 +98,11 @@ def persist(msg):
     )
     email = email.save()
 
-    # send message to ZMQ
-    if config.zmq['active']:
-        for email in Email.select():
-            z_msg = email.to_dict()
-        z_msg['topic'] = 'email:mail'
-        zpub.send_string(json.dumps(z_msg, indent=False, sort_keys=False))
-
+    if config.rabbitmq['active']:
+        channel = get_rmq_channel()
+        channel.basic_publish(exchange=config.rabbitmq['exchange'],
+                              routing_key='mail.message',
+                              body=json.dumps(email.to_dict(), indent=False, sort_keys=False))
     return True
 
 

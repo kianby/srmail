@@ -8,3 +8,4 @@ general = {}
 http = {}
 imap = {}
 smtp = {}
+rabbitmq = {}

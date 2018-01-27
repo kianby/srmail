@@ -28,7 +28,7 @@ def srmail_server(config_pathname):
     config.smtp = conf['smtp']
     config.imap = conf['imap']
     config.http = conf['http']
-    config.zmq = conf['zmq']
+    config.rabbitmq = conf['rabbitmq']
 
     # start application
     from core import app

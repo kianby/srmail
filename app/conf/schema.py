@@ -24,16 +24,16 @@ json_schema = """
                 "http": {
                     "$ref": "#/definitions/HTTP"
                 },
-                "zmq": {
-                    "$ref": "#/definitions/Zmq"
+                "rabbitmq": {
+                    "$ref": "#/definitions/Rabbitmq"
                 }
             },
             "required": [
                 "general",
                 "http",
                 "imap",
-                "smtp",
-                "zmq"
+                "rabbitmq",
+                "smtp"
             ],
             "title": "srmail"
         },
@@ -83,15 +83,7 @@ json_schema = """
                     "type": "string"
                 },
                 "ssl": {
-                    "oneOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "ssl"
+                    "type": "boolean"
                 },
                 "port": {
                     "type": "integer"
@@ -103,15 +95,7 @@ json_schema = """
                     "type": "string"
                 },
                 "starttls": {
-                    "oneOf": [
-                        {
-                            "type": "boolean"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "title": "ssl"
+                    "type": "boolean"
                 }
             },
             "required": [
@@ -122,7 +106,7 @@ json_schema = """
             ],
             "title": "imap"
         },
-        "Zmq": {
+        "Rabbitmq": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -132,20 +116,32 @@ json_schema = """
                 "host": {
                     "type": "string"
                 },
-                "pub_port": {
+                "port": {
                     "type": "integer"
                 },
-                "sub_port": {
-                    "type": "integer"
+                "username": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "vhost": {
+                    "type": "string"
+                },
+                "exchange": {
+                    "type": "string"
                 }
             },
             "required": [
                 "active",
+                "exchange",
                 "host",
-                "pub_port",
-                "sub_port"
+                "password",
+                "port",
+                "username",
+                "vhost"
             ],
-            "title": "zmq"
+            "title": "rabbitmq"
         }
     }
 }
