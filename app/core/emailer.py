@@ -38,17 +38,20 @@ class Emailer(Thread):
 
             try:
                 with imap.Mailbox() as mbox:
-                    count = mbox.get_count()
-                    if not count:
-                        continue
-                    logger.debug('inbox: %d email(s)' % count)
-                    for num in range(count):
-                        msg = mbox.fetch_message(num + 1)
-                        if persist(msg):
-                            mbox.delete_message(msg['index'])
-                            time.sleep(10)
+                    try:
+                        count = mbox.get_count()
+                        if not count:
+                            continue
+                        logger.debug('inbox: %d email(s)' % count)
+                        for num in range(count):
+                            msg = mbox.fetch_message(num + 1)
+                            if persist(msg):
+                                mbox.delete_message(msg['index'])
+                                time.sleep(10)
+                    except:
+                        logger.exception("main loop exception")        
             except:
-                logger.exception("main loop exception")
+                logger.exception("cannot open mailbox exception")
 
             # check email every <polling> seconds
             sleep_time = 0
