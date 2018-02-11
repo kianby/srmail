@@ -24,7 +24,7 @@ def process_message(chan, method, properties, body):
         if email is None:
             logger.info('cannot retrieve email to delete: {}'.format(data))
         else:
-            email.delete()
+            email.delete_instance()
     else:
         logger.warn('unknown command {}'.format(topic))
 
