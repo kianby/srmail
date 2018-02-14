@@ -1,2 +1,2 @@
 #!/bin/sh
-python app/srmail.py "$@"
+python app/run.py "$@"
