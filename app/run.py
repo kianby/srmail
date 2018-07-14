@@ -22,7 +22,7 @@ def srmail_server(config_pathname):
     conf = load_json(config_pathname)
     json_schema = json.loads(schema.json_schema) 
     validate(conf, json_schema)
-    
+
     # set configuration
     config.general = conf['general']
     config.smtp = conf['smtp']

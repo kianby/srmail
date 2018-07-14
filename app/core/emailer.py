@@ -13,7 +13,7 @@ from email.mime.text import MIMEText
 from conf import config
 from core import imap
 from model.email import Email
-
+from util import rabbit
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class Emailer(Thread):
                                 mbox.delete_message(msg['index'])
                                 time.sleep(10)
                     except:
-                        logger.exception("main loop exception")        
+                        logger.exception("main loop exception")
             except:
                 logger.exception("cannot open mailbox exception")
 
@@ -64,20 +64,32 @@ class Emailer(Thread):
         self.is_running = False
 
 
+def get_rabbitmq_connection():
+
+    credentials = pika.PlainCredentials(
+        config.rabbitmq['username'], config.rabbitmq['password'])
+    parameters = pika.ConnectionParameters(
+        host=config.rabbitmq['host'],
+        port=config.rabbitmq['port'],
+        credentials=credentials,
+        virtual_host=config.rabbitmq['vhost']
+    )
+    return rabbit.Connection(parameters)
+
+
 def pub_rabbitmq_mail_messages(emails):
     if not emails:
         return
-    credentials = pika.PlainCredentials(
-        config.rabbitmq['username'], config.rabbitmq['password'])
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host=config.rabbitmq['host'], port=config.rabbitmq[
-                                         'port'], credentials=credentials, virtual_host=config.rabbitmq['vhost']))
+
+    connector = get_rabbitmq_connection()
+    connection = connector.open()
     channel = connection.channel()
 
     for email in emails:
         channel.basic_publish(exchange=config.rabbitmq['exchange'],
                               routing_key='mail.message',
                               body=json.dumps(email.to_dict(), indent=False, sort_keys=False))
-    connection.close()
+    connector.close()
 
 
 def broadcast_emails():
@@ -104,7 +116,7 @@ def persist(msg):
         fromaddr=msg['from'],
         toaddr=msg['to'],
         subject=msg['subject'],
-        content= json_content
+        content=json_content
     )
     success = email.save()
 

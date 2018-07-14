@@ -4,6 +4,7 @@
 import sys
 import os
 import logging
+import signal
 from flask import Flask
 from conf import config
 from core import emailer
@@ -57,8 +58,9 @@ if(config.http['active']):
             port=config.http['port'],
             debug=False, use_reloader=False)
 else:
-    input("\nPress Enter to stop.")
-
+    logger.info("\nSend signal to stop.")
+    signal.pause()
+    
 # Exit application
 if mailer:
     mailer.stop()
