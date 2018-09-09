@@ -44,7 +44,17 @@ Configuration is a .ini file.
 GET /mbox => count as JSON
 
     curl http://localhost:8000/mbox
-    => {"count": 3}
+    => {
+          "count": 1,
+          "emails": [
+              {
+                  "datetime": "2018-09-09 17:21:02",
+                  "encoding": "UTF-8",
+                  "from": "Yanx <yax@mydomain.com>",
+                  "subject": "Test"
+              }
+          ]
+        }
 
 **Read a message**
 

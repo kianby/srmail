@@ -39,5 +39,17 @@ def get(key):
     return params[key]
 
 
+def getInt(key):
+    return int(params[key])
+
+
+def _str2bool(v):
+    return v.lower() in ("yes", "true", "t", "1")
+
+
+def getBool(key):
+    return _str2bool(params[key])
+
+
 def flaskapp():
     return params[FLASK_APP]

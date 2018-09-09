@@ -7,27 +7,25 @@ import logging
 import base64
 import re
 import datetime
-from conf import config
 
 filename_re = re.compile('filename="(.+)"|filename=([^;\n\r"\']+)', re.I | re.S)
 
 
 class Mailbox(object):
-    def __init__(self):
+    def __init__(self, host, port, ssl, login, password):
         self.logger = logging.getLogger(__name__)
+        self.host = host
+        self.port = port
+        self.ssl = ssl
+        self.login = login
+        self.password = password
 
     def __enter__(self):
-        if config.get(config.IMAP_SSL):
-            self.imap = imaplib.IMAP4_SSL(
-                config.get(config.IMAP_HOST), config.get(config.IMAP_PORT)
-            )
+        if self.ssl:
+            self.imap = imaplib.IMAP4_SSL(self.host, self.port)
         else:
-            self.imap = imaplib.IMAP4(
-                config.get(config.IMAP_HOST), config.get(config.IMAP_PORT)
-            )
-        self.imap.login(
-            config.get(config.IMAP_LOGIN), config.get(config.IMAP_PASSWORD)
-        )
+            self.imap = imaplib.IMAP4(self.host, self.port)
+        self.imap.login(self.login, self.password)
         return self
 
     def __exit__(self, type, value, traceback):
@@ -36,12 +34,12 @@ class Mailbox(object):
 
     def get_count(self):
         self.imap.select("Inbox")
-        status, data = self.imap.search(None, "ALL")
+        _, data = self.imap.search(None, "ALL")
         return sum(1 for num in data[0].split())
 
     def fetch_raw_message(self, num):
         self.imap.select("Inbox")
-        status, data = self.imap.fetch(str(num), "(RFC822)")
+        _, data = self.imap.fetch(str(num), "(RFC822)")
         email_msg = email.message_from_bytes(data[0][1])
         return email_msg
 
@@ -108,14 +106,14 @@ class Mailbox(object):
 
     def delete_all(self):
         self.imap.select("Inbox")
-        status, data = self.imap.search(None, "ALL")
+        _, data = self.imap.search(None, "ALL")
         for num in data[0].split():
             self.imap.store(num, "+FLAGS", r"\Deleted")
             self.imap.expunge()
 
     def print_msgs(self):
         self.imap.select("Inbox")
-        status, data = self.imap.search(None, "ALL")
+        _, data = self.imap.search(None, "ALL")
         for num in reversed(data[0].split()):
             status, data = self.imap.fetch(num, "(RFC822)")
             self.logger.debug("Message %s\n%s\n" % (num, data[0][1]))

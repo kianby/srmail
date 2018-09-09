@@ -56,7 +56,7 @@ def srmail_server(config_pathname):
     database.setup()
 
     # cron email fetcher
-    app.config.from_object(JobConfig(int(config.get(config.IMAP_POLLING))))
+    app.config.from_object(JobConfig(config.getInt(config.IMAP_POLLING)))
     scheduler = APScheduler()
     scheduler.init_app(app)
     scheduler.start()

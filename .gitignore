@@ -63,3 +63,4 @@ target/
 config-dev.json
 db.sqlite
 .vscode/
+configtest.ini
