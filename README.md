@@ -5,7 +5,10 @@ RESTful API. Because of security considerations, SRMail is likely to listen on
 localhost and provide e-mail services to other applications running on the same
 host. For that purpose SRMail manages an email account via IMAP and SMTP.
 
-SRMail is written in Python 3.
+Requirements: 
+
+- Python 3.7
+- pip libs: flask flask-apscheduler peewee clize profig 
 
 ### Configuration
 
