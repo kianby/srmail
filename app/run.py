@@ -50,9 +50,6 @@ def srmail_server(config_pathname):
     logger = logging.getLogger(__name__)
     configure_logging(logging.INFO)
 
-    # set configuration
-    # config.cwd = os.getcwd()
-
     # initialize database
     from core import database
 
