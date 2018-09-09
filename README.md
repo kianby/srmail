@@ -12,48 +12,30 @@ Requirements:
 
 ### Configuration
 
-Configuration is a JSON file having *global*, *imap*, *smtp* and *http*
-sections. **polling** is IMAP inbox polling in seconds. It is used when new
-e-mails are posted to RESTful clients defined in **post** section.    
+Configuration is a .ini file.
 
-    {
-      "global" : {
-        "lang": "en",
-        "polling": 120,
-        "exit_on_error": true
-      },
-      "imap": {
-        "host": "mail.gandi.net",
-        "ssl" : false,
-        "port": 143,
-        "login": "blog@mydomain.com",
-        "password":"MYPASSWORD"
-      },
-      "smtp": {
-        "host":"mail.gandi.net",
-        "starttls" : true,
-        "port": 587,
-        "login": "blog@mydomain.com",
-        "password":"MYPASSWORD"
-      },
-      "http": {
-        "host": "127.0.0.1",
-        "port": 8000
-      },
-      "post": {
-          "default": "http://localhost:2222/defaultposting",
-          "routing": [
-              {
-                   "regex": "diaspo.*",                  
-                   "url": "http://localhost:7777/postmail"
-              },
-              {
-                   "regex": "contact",
-                   "url": "http://localhost:7755/postmail"
-              },  
-          ]
-      }
-    }
+    ; Default configuration
+    [main]
+    db_url = sqlite:///db.sqlite
+
+    [imap]
+    polling = 120
+    host = mail.gandi.net
+    ssl = false
+    port = 143
+    login = blog@mydomain.com
+    password = MYPASSWORD
+
+    [smtp]
+    host = mail.gandi.net
+    starttls = true
+    port = 587
+    login = blog@mydomain.com
+    password = MYPASSWORD
+
+    [http]
+    host = 127.0.0.1
+    port = 8000
 
 ### API by example
 

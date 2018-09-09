@@ -7,11 +7,11 @@ import profig
 FLASK_APP = "flask.app"
 
 DB_URL = "main.db_url"
-POLLING = "main.polling"
 
 HTTP_HOST = "http.host"
 HTTP_PORT = "http.port"
 
+IMAP_POLLING = "imap.polling"
 IMAP_SSL = "imap.ssl"
 IMAP_HOST = "imap.host"
 IMAP_PORT = "imap.port"
