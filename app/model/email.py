@@ -27,6 +27,7 @@ class Email(Model):
         email_dict = json.loads(self.content)
         if 'parts' in email_dict:
             del email_dict['parts']
+        email_dict['id'] = self.id   
         return email_dict
 
     class Meta:
