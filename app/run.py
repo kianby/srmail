@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+import argparse
 import logging
 import os
-
 import sys
-from clize import Clize, run
 from flask import Flask
 from flask_apscheduler import APScheduler
 from conf import config
@@ -40,7 +39,6 @@ class JobConfig(object):
         ]
 
 
-@Clize
 def srmail_server(config_pathname):
 
     app = Flask(__name__)
@@ -80,4 +78,7 @@ def srmail_server(config_pathname):
 
 
 if __name__ == "__main__":
-    run(srmail_server)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("config", help="config path name")
+    args = parser.parse_args()
+    srmail_server(args.config)
